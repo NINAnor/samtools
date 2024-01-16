@@ -16,7 +16,7 @@
 #' create_odmap(path = "./test")
 #'
 #' @export
-create_odmap <- function(path = ".", name,
+create_odmap <- function(path = ".",
                          overwrite = FALSE) {
 
   # check path and create it if

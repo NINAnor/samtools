@@ -4,7 +4,7 @@
 \alias{create_odmap}
 \title{Create folder with ODMAP structure}
 \usage{
-create_odmap(path = ".", name, overwrite = FALSE)
+create_odmap(path = ".", overwrite = FALSE)
 }
 \arguments{
 \item{path}{\verb{[character]} \cr Path where the folder will be created, including
