@@ -1,3 +1,5 @@
+# `samtools`
+
 `samtools` provides tools for dealing with data and databases within NINA. In special,
 it is intended to deal with the SAM (spatial and animal movement) database.
 
