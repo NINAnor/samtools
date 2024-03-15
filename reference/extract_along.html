@@ -52,13 +52,35 @@ The function is actually not very optimized currently.</p>
 <span>  col_step_length <span class="op">=</span> <span class="st">"dist"</span>,</span>
 <span>  step_id <span class="op">=</span> <span class="st">"use_ava_data_animals_id"</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"along_"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for SpatRaster</span></span>
+<span><span class="fu">extract_along</span><span class="op">(</span></span>
+<span>  <span class="va">r</span>,</span>
+<span>  <span class="va">sl</span>,</span>
+<span>  <span class="va">ws</span>,</span>
+<span>  col_step_length <span class="op">=</span> <span class="st">"dist"</span>,</span>
+<span>  step_id <span class="op">=</span> <span class="st">"use_ava_data_animals_id"</span>,</span>
+<span>  prefix <span class="op">=</span> <span class="st">"along_"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for data.frame</span></span>
+<span><span class="fu">extract_along</span><span class="op">(</span></span>
+<span>  <span class="va">r</span>,</span>
+<span>  <span class="va">sl</span>,</span>
+<span>  <span class="va">ws</span>,</span>
+<span>  col_step_length <span class="op">=</span> <span class="st">"dist"</span>,</span>
+<span>  step_id <span class="op">=</span> <span class="st">"use_ava_data_animals_id"</span>,</span>
+<span>  prefix <span class="op">=</span> <span class="st">"along_"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>r</dt>
-<dd><p><code>[SpatRast]</code> <br> Set of rasters, in the <code>SpatRaster</code> format from terra.</p></dd>
+<dd><p><code>[SpatRast,data.frame]</code> <br> Either a set of rasters, in the <code>SpatRaster</code>
+format from terra; or a <code>data.frame</code> resulting of <code><a href="https://rspatial.github.io/terra/reference/extract.html" class="external-link">terra::extract</a></code> for
+linestrings, for a set of environmental variables (defined here as the columns).</p></dd>
 
 
 <dt>sl</dt>
