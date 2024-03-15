@@ -2,6 +2,8 @@
 % Please edit documentation in R/extract_along.R
 \name{extract_along}
 \alias{extract_along}
+\alias{extract_along.SpatRaster}
+\alias{extract_along.data.frame}
 \title{Extract values of raster using in parallel}
 \usage{
 extract_along(
@@ -12,9 +14,29 @@ extract_along(
   step_id = "use_ava_data_animals_id",
   prefix = "along_"
 )
+
+\method{extract_along}{SpatRaster}(
+  r,
+  sl,
+  ws,
+  col_step_length = "dist",
+  step_id = "use_ava_data_animals_id",
+  prefix = "along_"
+)
+
+\method{extract_along}{data.frame}(
+  r,
+  sl,
+  ws,
+  col_step_length = "dist",
+  step_id = "use_ava_data_animals_id",
+  prefix = "along_"
+)
 }
 \arguments{
-\item{r}{\verb{[SpatRast]} \cr Set of rasters, in the \code{SpatRaster} format from \link{terra}.}
+\item{r}{\verb{[SpatRast,data.frame]} \cr Either a set of rasters, in the \code{SpatRaster}
+format from \link{terra}; or a \code{data.frame} resulting of \code{terra::extract} for
+linestrings, for a set of environmental variables (defined here as the columns).}
 
 \item{sl}{Vector of step lines, with a column representing the step id
 (stratum or just step number) and a LINESTRING geometry for each step.
