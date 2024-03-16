@@ -105,7 +105,7 @@ extract_along.data.frame <- function(r, sl, ws,
   ws <- c("mean", unlist(ws))
 
   # remove NAs
-  # whichNA <- which(is.na(sl[[col_step_length]]))
+  whichNA <- which(is.na(sl[[col_step_length]]))
   # whichkeep <- which(!is.na(sl[[col_step_length]]))
 
   # extract values
