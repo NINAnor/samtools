@@ -105,7 +105,7 @@ extract_along.data.frame <- function(r, sl, ws,
   ws <- c("mean", unlist(ws))
 
   # remove NAs
-  # whichNA <- which(is.na(sl[[col_step_length]]))
+  whichNA <- which(is.na(sl[[col_step_length]]))
   # whichkeep <- which(!is.na(sl[[col_step_length]]))
 
   # extract values
@@ -137,7 +137,7 @@ extract_along.data.frame <- function(r, sl, ws,
 
   # re-add NAs
   if(length(whichNA) > 0) {
-    summaries[whichNA, !grepl(step_id, colnames(summariesNA))] <- NA
+    summaries[whichNA, !grepl(step_id, colnames(summaries))] <- NA
   }
 
   # summaries[,1] == sl[[step_id]]
