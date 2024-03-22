@@ -51,7 +51,8 @@ The function is actually not very optimized currently.</p>
 <span>  <span class="va">ws</span>,</span>
 <span>  col_step_length <span class="op">=</span> <span class="st">"dist"</span>,</span>
 <span>  step_id <span class="op">=</span> <span class="st">"use_ava_data_animals_id"</span>,</span>
-<span>  prefix <span class="op">=</span> <span class="st">"along_"</span></span>
+<span>  prefix <span class="op">=</span> <span class="st">"along_"</span>,</span>
+<span>  summarize <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for SpatRaster</span></span>
@@ -61,7 +62,8 @@ The function is actually not very optimized currently.</p>
 <span>  <span class="va">ws</span>,</span>
 <span>  col_step_length <span class="op">=</span> <span class="st">"dist"</span>,</span>
 <span>  step_id <span class="op">=</span> <span class="st">"use_ava_data_animals_id"</span>,</span>
-<span>  prefix <span class="op">=</span> <span class="st">"along_"</span></span>
+<span>  prefix <span class="op">=</span> <span class="st">"along_"</span>,</span>
+<span>  summarize <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for data.frame</span></span>
@@ -84,9 +86,9 @@ linestrings, for a set of environmental variables (defined here as the columns).
 
 
 <dt>sl</dt>
-<dd><p>Vector of step lines, with a column representing the step id
-(stratum or just step number) and a LINESTRING geometry for each step.
-Can be a <code>sf</code> or a <code>SpatVector</code> object.</p></dd>
+<dd><p><code>[sf,SpatVector]</code> <br> Vector of step lines, with a column
+representing the step id (stratum or just step number) and a LINESTRING
+geometry for each step. Can be a <code>sf</code> or a <code>SpatVector</code> object.</p></dd>
 
 
 <dt>ws</dt>
