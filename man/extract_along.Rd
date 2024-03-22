@@ -12,7 +12,8 @@ extract_along(
   ws,
   col_step_length = "dist",
   step_id = "use_ava_data_animals_id",
-  prefix = "along_"
+  prefix = "along_",
+  summarize = TRUE
 )
 
 \method{extract_along}{SpatRaster}(
@@ -21,7 +22,8 @@ extract_along(
   ws,
   col_step_length = "dist",
   step_id = "use_ava_data_animals_id",
-  prefix = "along_"
+  prefix = "along_",
+  summarize = TRUE
 )
 
 \method{extract_along}{data.frame}(
@@ -38,9 +40,9 @@ extract_along(
 format from \link{terra}; or a \code{data.frame} resulting of \code{terra::extract} for
 linestrings, for a set of environmental variables (defined here as the columns).}
 
-\item{sl}{Vector of step lines, with a column representing the step id
-(stratum or just step number) and a LINESTRING geometry for each step.
-Can be a \code{sf} or a \code{SpatVector} object.}
+\item{sl}{\verb{[sf,SpatVector]} \cr Vector of step lines, with a column
+representing the step id (stratum or just step number) and a LINESTRING
+geometry for each step. Can be a \code{sf} or a \code{SpatVector} object.}
 
 \item{ws}{List of which summary statistics are to be computed. Currently, only "mean", "max",
 "min", and "sum" are implemented.}

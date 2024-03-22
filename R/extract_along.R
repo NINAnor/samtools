@@ -6,9 +6,9 @@
 #' @param r `[SpatRast,data.frame]` \cr Either a set of rasters, in the `SpatRaster`
 #' format from [terra]; or a `data.frame` resulting of `terra::extract` for
 #' linestrings, for a set of environmental variables (defined here as the columns).
-#' @param sl Vector of step lines, with a column representing the step id
-#' (stratum or just step number) and a LINESTRING geometry for each step.
-#' Can be a `sf` or a `SpatVector` object.
+#' @param sl `[sf,SpatVector]` \cr Vector of step lines, with a column
+#' representing the step id (stratum or just step number) and a LINESTRING
+#' geometry for each step. Can be a `sf` or a `SpatVector` object.
 #' @param ws List of which summary statistics are to be computed. Currently, only "mean", "max",
 #' "min", and "sum" are implemented.
 #' @param col_step_length `[character="dist"]` \cr String with the name of the
@@ -24,7 +24,8 @@
 extract_along <- function(r, sl, ws,
                           col_step_length = "dist",
                           step_id = "use_ava_data_animals_id",
-                          prefix = "along_") {
+                          prefix = "along_",
+                          summarize = TRUE) {
   UseMethod("extract_along")
 }
 
@@ -34,7 +35,8 @@ extract_along <- function(r, sl, ws,
 extract_along.SpatRaster <- function(r, sl, ws,
                                      col_step_length = "dist",
                                      step_id = "use_ava_data_animals_id",
-                                     prefix = "along_"){
+                                     prefix = "along_",
+                                     summarize = TRUE){
 
   # check number of summaries
   n_summaries <- sapply(ws, length)
@@ -54,38 +56,50 @@ extract_along.SpatRaster <- function(r, sl, ws,
   # extracted_values <- terra::extract(r, terra::vect(sl), fun=mean)
   # ext_v <- raster::extract(raster::raster(r), sl)
 
-  # repeat column for which there is more than one summary statistic
-  n_summaries <- c(1, n_summaries) # add 1 for ID
-  indices <- rep(1:ncol(extracted_values), times = n_summaries)
-  ext_val_rep <- extracted_values[,indices]
-  # split extracted values by step (column ID automatically created)
-  ext_val_split <- split(ext_val_rep, extracted_values$ID)
+  if(summarize) {
+    # repeat column for which there is more than one summary statistic
+    n_summaries <- c(1, n_summaries) # add 1 for ID
+    indices <- rep(1:ncol(extracted_values), times = n_summaries)
+    ext_val_rep <- extracted_values[,indices]
+    # split extracted values by step (column ID automatically created)
+    ext_val_split <- split(ext_val_rep, extracted_values$ID)
 
-  # #max slope
-  # step_values <- data.frame(step_id = sl$use_ava_data_animals_id)
-  #
-  # tmp <- unlist(lapply(extracted_values, function(x){ get_summary(matrix(x[,1]), "max")}))
-  # step_values$max_slope <- tmp
+    # #max slope
+    # step_values <- data.frame(step_id = sl$use_ava_data_animals_id)
+    #
+    # tmp <- unlist(lapply(extracted_values, function(x){ get_summary(matrix(x[,1]), "max")}))
+    # step_values$max_slope <- tmp
 
-  #all other variables
-  summaries <- data.frame(do.call("rbind", lapply(ext_val_split, get_summary, y = ws)))
+    #all other variables
+    summaries <- data.frame(do.call("rbind", lapply(ext_val_split, get_summary, y = ws)))
 
-  colnames(summaries) <- c(step_id,
-                           paste0(prefix,
-                                  sapply(strsplit(colnames(ext_val_rep)[-1], split="@"), function(x) x[1]), "_", ws[-1]))
+    colnames(summaries) <- c(step_id,
+                             paste0(prefix,
+                                    sapply(strsplit(colnames(ext_val_rep)[-1], split="@"), function(x) x[1]), "_", ws[-1]))
 
-  # re-add NAs
-  if(length(whichNA) > 0) {
-    summariesNA <- summaries[1:length(whichNA),]
-    summariesNA[[step_id]] <- sl[[step_id]][whichNA]
-    summariesNA[,!grepl(step_id, colnames(summariesNA))] <- NA
-    summaries <- rbind(summaries, summariesNA)
-    summaries <- summaries[order(c(whichkeep, whichNA)),]
+    # re-add NAs
+    if(length(whichNA) > 0) {
+      summariesNA <- summaries[1:length(whichNA),]
+      summariesNA[[step_id]] <- sl[[step_id]][whichNA]
+      summariesNA[,!grepl(step_id, colnames(summariesNA))] <- NA
+      summaries <- rbind(summaries, summariesNA)
+      summaries <- summaries[order(c(whichkeep, whichNA)),]
+    }
+
+    summaries[,1] <- sl[[step_id]]
+
+    return(summaries)
+  } else {
+    # check length
+    length(sl[[step_id]][whichkeep])
+    length(unique(extracted_values$ID))
+    # vector with step ids
+    step_ids <- factor(sl[[step_id]][whichkeep], levels = sl[[step_id]][whichkeep])[extracted_values$ID] |>
+      as.character() |> as.numeric()
+    extracted_values <- cbind(step_ids, extracted_values[-1])
+    colnames(extracted_values)[1] <- step_id
+    return(extracted_values)
   }
-
-  summaries[,1] <- sl[[step_id]]
-
-  return(summaries)
 }
 
 #' @rdname extract_along
@@ -154,6 +168,7 @@ get_summary <- function(x, y){
     if (c[a]=="max") { res <- base::max(as.numeric(as.character(b[,a])), na.rm=T) }
     if (c[a]=="min") { res <- base::min(as.numeric(as.character(b[,a])), na.rm=T) }
     if (c[a]=="sum") { res <- base::sum(as.numeric(as.character(b[,a])), na.rm=T) }
+    if (c[a]=="prop") { res <- base::sum(as.numeric(as.character(b[,a])), na.rm=T)/length(as.numeric(as.character(b[,a]))[!is.na(as.numeric(as.character(b[,a])))]) }
     return(res)
   }
   res <- unlist(lapply(c(1:ncol(x)), toto, b = x, c = y))
