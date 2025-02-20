@@ -1,45 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://ninanor.github.io/samtools/404.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/index.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/create_odmap.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/db_make_query.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/db_read_vect.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/db_summarize.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/db_write_vect.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/extract_along.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/grass_get_res.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/grass_raster_info.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/grass_set_region.html</loc>
-  </url>
-  <url>
-    <loc>https://ninanor.github.io/samtools/reference/index.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://ninanor.github.io/samtools/404.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/LICENSE.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/authors.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/index.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/create_odmap.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/data_prep_rsf_habitat_rein.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/db_make_query.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/db_read_vect.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/db_summarize.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/db_write_vect.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/extract_along.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/grass_get_res.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/grass_raster_info.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/grass_set_region.html</loc></url>
+<url><loc>https://ninanor.github.io/samtools/reference/index.html</loc></url>
 </urlset>
+
