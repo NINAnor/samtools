@@ -7,5 +7,13 @@
 grass_set_region(flags = c("p"), ...)
 }
 \description{
+Helper function to set the computation region of an open GRASS GIS
+session connected to the R session, e.g. through \code{\link[rgrass:initGRASS]{rgrass::initGRASS()}}.
 To know more about the arguments, check: https://grass.osgeo.org/grass82/manuals/g.region.html
+}
+\examples{
+if(FALSE) {
+  grass_set_region(res = 30)
+}
+
 }

@@ -1,5 +1,8 @@
 #' Get information from a raster
 #'
+#' This function gets information from a raster layer in GRASS GIS and returns
+#' it as a list. It is a wrapper for [rgrass::r.info()].
+#'
 #' @param map `[character]` \cr Name of the raster layer, possibly including the
 #' mapset in the format `"map_name@mapset_name"` if in a mapset different from the
 #' current mapset.
@@ -10,10 +13,12 @@
 #' of rows, cols, and cells, and the type of data (e.g. CELL, FCELL).
 #'
 #' @examples
-#' # connect to GRASS
-#' NinaR::grassConnect()
-#' # get raster parameters
-#' grass_raster_info(map = "master_grid_100m_norway@p_sam_tools")
+#' if(FALSE) {
+#'   # connect to GRASS
+#'   NinaR::grassConnect()
+#'   # get raster parameters
+#'   grass_raster_info(map = "master_grid_100m_norway@p_sam_tools")
+#' }
 #'
 #' @export
 grass_raster_info <- function(map) {

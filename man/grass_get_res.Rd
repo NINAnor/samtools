@@ -16,13 +16,15 @@ A number representing the pixel size, based on the \code{nsres} parameter from
 \code{r.info}, in units defined based on the project/location CRS. Should generally be meters.
 }
 \description{
-Get resolution from a raster map in a GRASS GIS database
+This function gets the resolution of a raster layer in GRASS GIS.
 }
 \examples{
-# connect to GRASS
-NinaR::grassConnect()
-# get resolution
-grass_get_res(map = "master_grid_100m_norway@p_sam_tools")
-grass_get_res(map = "master_grid_1km_norway@p_sam_tools")
+if(FALSE) {
+  # connect to GRASS
+  NinaR::grassConnect()
+  # get resolution
+  grass_get_res(map = "master_grid_100m_norway@p_sam_tools")
+  grass_get_res(map = "master_grid_1km_norway@p_sam_tools")
+}
 
 }
