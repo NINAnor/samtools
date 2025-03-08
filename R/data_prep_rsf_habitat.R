@@ -472,7 +472,8 @@ data_prep_rsf_habitat_rein <- function(dat, season,
   cols_graz_avg_n <- grep(string, names(dat))
   names(dat)[cols_graz_avg_n]
   names(dat)[cols_graz_avg_n] <- sub(string, "grazing_animals_avg", names(dat)[cols_graz_avg_n])
-
+  # replace NAs
+  dat[cols_graz_avg_n] <- ifelse(is.na(dat[cols_graz_avg_n]), 0, dat[cols_graz_avg_n])
 
   # # merge roads  high-low - very few of each
   # dat$roads_100 <- (dat$roads_summer_high_100 + dat$roads_summer_low_100)
