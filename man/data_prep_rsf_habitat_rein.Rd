@@ -15,6 +15,7 @@ data_prep_rsf_habitat_rein(
   include_zoi_nearest = FALSE,
   species = c("wrein", "trein")[1],
   prefix = "",
+  reference_year = lubridate::year(lubridate::now()),
   use_binary_vars_as_categorical = FALSE
 )
 }

@@ -20,7 +20,8 @@ Imports:
     DBI,
     sf,
     terra,
-    rgrass
+    rgrass,
+    lubridate
 Remotes:
     NINAnor/NinaR
 URL: https://ninanor.github.io/samtools/

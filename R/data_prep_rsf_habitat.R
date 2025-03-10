@@ -43,6 +43,7 @@ data_prep_rsf_habitat_rein <- function(dat, season,
                                        include_zoi_nearest = FALSE,
                                        species = c("wrein", "trein")[1],
                                        prefix = "",
+                                       reference_year = lubridate::year(lubridate::now()),
                                        use_binary_vars_as_categorical = FALSE) {
 
   #---
@@ -349,7 +350,7 @@ data_prep_rsf_habitat_rein <- function(dat, season,
       clear_cuts_lines <- which(!is.na(dat[[paste0(prefix, "clear_cuts_se")]]))
       dat[[paste0(prefix, "landcover_norut_smd")]] <- as.character(dat[[paste0(prefix, "landcover_norut_smd")]])
       dat[[paste0(prefix, "landcover_norut_smd")]][clear_cuts_lines] <-
-        ifelse(dat[["year"]][clear_cuts_lines] > dat[[paste0(prefix, "clear_cuts_se")]][clear_cuts_lines],
+        ifelse(reference_year > dat[[paste0(prefix, "clear_cuts_se")]][clear_cuts_lines],
                "clear_cut", dat[[paste0(prefix, "landcover_norut_smd")]][clear_cuts_lines])
       dat[[paste0(prefix, "landcover_norut_smd")]] <- factor(dat[[paste0(prefix, "landcover_norut_smd")]],
                                                              levels = levels_norut_smd)
@@ -473,7 +474,9 @@ data_prep_rsf_habitat_rein <- function(dat, season,
   names(dat)[cols_graz_avg_n]
   names(dat)[cols_graz_avg_n] <- sub(string, "grazing_animals_avg", names(dat)[cols_graz_avg_n])
   # replace NAs
-  dat[cols_graz_avg_n] <- ifelse(is.na(dat[cols_graz_avg_n]), 0, dat[cols_graz_avg_n])
+  # if(season == "sum" & species = "wrein") {
+  #   dat[cols_graz_avg_n] <- ifelse(is.na(dat[cols_graz_avg_n]), 0, dat[cols_graz_avg_n])
+  # }
 
   # # merge roads  high-low - very few of each
   # dat$roads_100 <- (dat$roads_summer_high_100 + dat$roads_summer_low_100)
