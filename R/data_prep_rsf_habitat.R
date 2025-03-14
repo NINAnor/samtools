@@ -86,6 +86,13 @@ data_prep_rsf_habitat_rein <- function(dat, season,
   names(dat)[cols_rmaj_n]
   roads_seas <- ifelse(season == "sum", "sum", "win")
   names(dat)[cols_rmaj_n] <- sub(paste0(string, "_", roads_seas), string, names(dat)[cols_rmaj_n])
+  # log road volume in roads major
+  radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+  for (i in radii){
+    tmp <- log10(dat[,paste0("roads_major_bartlett", i)]+1)
+    dat <- cbind(dat, tmp)
+    names(dat)[ncol(dat)] <- paste0("roads_major_log_bartlett", i)#
+  }
   # roads minor
   string <- "roads_minor"
   cols_rmin_n <- grep(string, names(dat))
@@ -242,7 +249,7 @@ data_prep_rsf_habitat_rein <- function(dat, season,
   # log pseudotui
   radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
   for (i in radii){
-    tmp <- log(dat[,paste0("trails_pseudotui_bartlett", i)]+1)
+    tmp <- log10(dat[,paste0("trails_pseudotui_bartlett", i)]+1)
     dat <- cbind(dat, tmp)
     names(dat)[ncol(dat)] <- paste0("trails_log_pseudotui_bartlett", i)#
   }
