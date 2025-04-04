@@ -157,7 +157,7 @@ db_summarize <- function(con, areas, variables, variable_names,
       # compute density
       tb <- tb |>
         dplyr::left_join(tb_tot) |>
-        mutate(!!rlang::sym(paste0("density_", v_name, "_per_", area_unit)) := !!rlang::sym(paste0("count_", v_name))/!!rlang::sym(paste0("area_total_", area_unit)))
+        dplyr::mutate(!!rlang::sym(paste0("density_", v_name, "_per_", area_unit)) := !!rlang::sym(paste0("count_", v_name))/!!rlang::sym(paste0("area_total_", area_unit)))
     }
 
     # for lines
@@ -182,7 +182,7 @@ db_summarize <- function(con, areas, variables, variable_names,
       # compute density
       tb <- tb |>
         dplyr::left_join(tb_tot) |>
-        mutate(!!rlang::sym(paste0("length_", v_name, "_", length_unit)) := ifelse(is.na(!!rlang::sym(paste0("length_", v_name, "_", length_unit))), 0, !!rlang::sym(paste0("length_", v_name, "_", length_unit))),
+        dplyr::mutate(!!rlang::sym(paste0("length_", v_name, "_", length_unit)) := ifelse(is.na(!!rlang::sym(paste0("length_", v_name, "_", length_unit))), 0, !!rlang::sym(paste0("length_", v_name, "_", length_unit))),
                !!rlang::sym(paste0("density_", v_name, "_", length_unit, "_per_", area_unit)) := !!rlang::sym(paste0("length_", v_name, "_", length_unit))/!!rlang::sym(paste0("area_total_", area_unit)))
 
     }
@@ -209,7 +209,7 @@ db_summarize <- function(con, areas, variables, variable_names,
       # compute density
       tb <- tb |>
         dplyr::left_join(tb_tot) |>
-        mutate(!!rlang::sym(paste0("area_", v_name, "_", area_unit)) := ifelse(is.na(!!rlang::sym(paste0("area_", v_name, "_", area_unit))), 0, !!rlang::sym(paste0("area_", v_name, "_", area_unit))),
+        dplyr::mutate(!!rlang::sym(paste0("area_", v_name, "_", area_unit)) := ifelse(is.na(!!rlang::sym(paste0("area_", v_name, "_", area_unit))), 0, !!rlang::sym(paste0("area_", v_name, "_", area_unit))),
                !!rlang::sym(paste0("density_", v_name, "_", area_unit, "_per_", area_unit)) := !!rlang::sym(paste0("area_", v_name, "_", area_unit))/!!rlang::sym(paste0("area_total_", area_unit)))
 
     }
