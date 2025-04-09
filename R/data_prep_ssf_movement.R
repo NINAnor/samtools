@@ -26,6 +26,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
                                         land_cover_factor = FALSE,
                                         land_cover = c("norut_smd", "norut", "smd", "nmd")[1],
                                         ref_landcover = "heathland",
+                                        tpi_factor = FALSE,
                                         include_zoi_nearest = FALSE,
                                         species = c("wrein", "trein")[1],
                                         prefix = c("along_", "endpt_", "")[1],
@@ -491,7 +492,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     cols_tr_n <- grep(paste0(cols_trails, collapse = "|"), names(dat))
     names(dat)[cols_tr_n]
     for(i in cols_tr_n) {
-      tmp <- log(dat[, i]+1)
+      tmp <- log10(dat[, i]+1)
       dat <- cbind(dat, tmp)
       names(dat)[ncol(dat)] <- sub("pseudotui", "log_pseudotui", names(dat)[i])
     }
@@ -510,7 +511,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
       cols_tr_n <- grep(string, names(dat))
       names(dat)[cols_tr_n]
       for(i in cols_tr_n) {
-        tmp <- log(dat[, i]+1)
+        tmp <- log10(dat[, i]+1)
         dat <- cbind(dat, tmp)
         names(dat)[ncol(dat)] <- sub("pseudotui", "log_pseudotui", names(dat)[i])
       }
@@ -593,8 +594,9 @@ data_prep_ssf_movement_rein <- function(dat, season,
       # dat$
       # dat$along_dem_cum_diff
     }
+    dat$log_along_dem_cum_diff <- log10(dat$along_dem_cum_diff + 1)
   }
-  dat$log_along_dem_cum_diff <- log(dat$along_dem_cum_diff + 1)
+
 
   names(dat)[grep("dem_slope", names(dat))] <- sub("dem_slope", "slope", names(dat)[grep("dem_slope", names(dat))])
   names(dat)[grep("dem_aspect", names(dat))] <- sub("dem_aspect", "aspect", names(dat)[grep("dem_aspect", names(dat))])
@@ -604,30 +606,40 @@ data_prep_ssf_movement_rein <- function(dat, season,
   names(dat)[cols_tpi_n]
   names(dat)[cols_tpi_n] <- sub(string, "tpi", names(dat)[cols_tpi_n])
   # TPI - categories
-  tpi_scales <- c(250, 2500)
-  string <- "dem_tpi"
-  cols_tpi_n <- grep(string, names(dat))
-  tpi_sc <- tpi_scales[1]
-  for(tpi_sc in tpi_scales) {
+  if(tpi_factor) {
 
-    cols_tpi_n <- grep(paste0("tpi_", tpi_sc, "_mean"), names(dat))
-    SD <- sd(dat[[names(dat)[cols_tpi_n]]], na.rm = TRUE)
-    new_col_name <- paste0(names(dat)[cols_tpi_n], "_cat")
-    dat[[new_col_name]] <- dplyr::case_when(
-      dat[[names(dat)[cols_tpi_n]]] <= -SD[1] ~ "valley",
-      dat[[names(dat)[cols_tpi_n]]] > -SD[1] & dat[[names(dat)[cols_tpi_n]]] <= -SD[1]/2  ~ "lower_slope",
-      dat[[names(dat)[cols_tpi_n]]] > -SD[1]/2 & dat[[names(dat)[cols_tpi_n]]] <= 0  ~ "flat_area",
-      dat[[names(dat)[cols_tpi_n]]] > 0 & dat[[names(dat)[cols_tpi_n]]] <= SD[1]/2  ~ "medium_slope",
-      dat[[names(dat)[cols_tpi_n]]] > SD[1]/2 & dat[[names(dat)[cols_tpi_n]]] <= SD[1]  ~ "upper_slope",
-      TRUE ~ "ridge"
-    )
-    rm(SD)
-    dat <- dat |>
+    tpi_scales <- c(250, 2500)
+    string <- "tpi"
+    cols_tpi_n <- grep(string, names(dat))
+    tpi_sc <- tpi_scales[1]
+    for(tpi_sc in tpi_scales) {
 
-      fastDummies::dummy_cols(select_columns = paste0(new_col_name), ignore_na = TRUE, remove_selected_columns = FALSE)
+      if(!prediction) {
+        cols_tpi_n <- grep(paste0("tpi_", tpi_sc, "_mean"), names(dat))
+      } else {
+        cols_tpi_n <- grep(paste0("tpi_", tpi_sc, "$"), names(dat))
+      }
+
+      # this should be the same SD for all the data!! we need to store that in the bag
+      SD <- sd(dat[[names(dat)[cols_tpi_n]]], na.rm = TRUE)
+      new_col_name <- paste0(names(dat)[cols_tpi_n], "_cat")
+      dat[[new_col_name]] <- dplyr::case_when(
+        dat[[names(dat)[cols_tpi_n]]] <= -SD[1] ~ "valley",
+        dat[[names(dat)[cols_tpi_n]]] > -SD[1] & dat[[names(dat)[cols_tpi_n]]] <= -SD[1]/2  ~ "lower_slope",
+        dat[[names(dat)[cols_tpi_n]]] > -SD[1]/2 & dat[[names(dat)[cols_tpi_n]]] <= 0  ~ "flat_area",
+        dat[[names(dat)[cols_tpi_n]]] > 0 & dat[[names(dat)[cols_tpi_n]]] <= SD[1]/2  ~ "medium_slope",
+        dat[[names(dat)[cols_tpi_n]]] > SD[1]/2 & dat[[names(dat)[cols_tpi_n]]] <= SD[1]  ~ "upper_slope",
+        TRUE ~ "ridge"
+      )
+      rm(SD)
+      dat <- dat |>
+
+        fastDummies::dummy_cols(select_columns = paste0(new_col_name), ignore_na = TRUE, remove_selected_columns = FALSE)
+
+    }
+    # dat$along_dem_tpi_2500_mean
 
   }
-  dat$along_dem_tpi_2500_mean
 
   # valley depth
   names(dat)[grep("valley_depth_100m", names(dat))] <- sub("valley_depth_100m", "valley_depth", names(dat)[grep("valley_depth_100m", names(dat))])
@@ -903,6 +915,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
         )
       )
 
+    ii = 1
     for(ii in seq_len(nrow(vars_table))) {
 
       string <- vars_table$name_formula[ii]
@@ -911,9 +924,11 @@ data_prep_ssf_movement_rein <- function(dat, season,
       string_env <- vars_table$name_envdata[ii]
       (rmin_vars_envdat <- grep(string_env, names(dat), value = TRUE))
 
+      i <- rmin_vars_envdat[2]
       for(i in rmin_vars_envdat) {
         if(length(nn <- grep(paste0(i, vars_table$suffix[ii]), rmin_vars)) > 0 & i != "lc_lichen") {
           # print(i)
+          if(length(nn) > 1) nn <- nn[1]
           dat[[rmin_vars[nn]]] <- dat[[i]]
         }
       }
@@ -931,29 +946,56 @@ data_prep_ssf_movement_rein <- function(dat, season,
 
   }
 
-  dat <- dat |>
-    dplyr::mutate(
-      along_tpi_500_mean_small = along_tpi_500_mean,
-      along_tpi_500_mean_small_2 = along_tpi_500_mean**2,
-      along_tpi_1000_mean_2 = along_tpi_1000_mean**2,
-      along_tpi_5000_mean_large = along_tpi_1000_mean,
-      along_tpi_1000_mean_large_2 = along_tpi_5000_mean**2,
-      along_tpi_250_mean_small = along_tpi_250_mean,
-      along_tpi_250_mean_small_2 = along_tpi_250_mean**2,
-      along_tpi_2500_mean_large = along_tpi_2500_mean,
-      along_tpi_2500_mean_large_2 = along_tpi_2500_mean**2,
-      # onset_spring_2 = onset_spring**2,
-      along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
-      along_slope_mean_2 = along_slope_mean**2,
-      along_slope_max_2 = along_slope_max**2,
-      # solar_radiation_2 = solar_radiation**2,
-      # bio12_annual_prec_2 = bio12_annual_prec**2,
-      # bio18_warmest_prec_2 = bio18_warmest_prec**2,
-      # bio19_coldest_prec_2 = bio19_coldest_prec**2,
-      # continentality_2 = continentality**2,
-      # growing_deg_days5_2 = growing_deg_days5**2,
-      # chelsa_scd_2 = chelsa_scd**2
-    )
+  if(prediction) {
+    dat <- dat |>
+      dplyr::mutate(
+        # along_tpi_500_mean_small = along_tpi_500_mean,
+        # along_tpi_500_mean_small_2 = along_tpi_500_mean**2,
+        # along_tpi_1000_mean_2 = along_tpi_1000_mean**2,
+        # along_tpi_5000_mean_large = along_tpi_1000_mean,
+        # along_tpi_1000_mean_large_2 = along_tpi_5000_mean**2,
+        # along_tpi_250_mean_small = along_tpi_250_mean,
+        along_tpi_250_mean_small_2 = along_tpi_250_mean_small**2,
+        # along_tpi_250_mean_small = along_tpi_2500_mean,
+        along_tpi_2500_mean_large_2 = along_tpi_250_mean_small**2,
+        # onset_spring_2 = onset_spring**2,
+        along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
+        # along_slope_mean_2 = along_slope_mean**2,
+        along_slope_max_2 = along_slope_max**2,
+        # solar_radiation_2 = solar_radiation**2,
+        # bio12_annual_prec_2 = bio12_annual_prec**2,
+        # bio18_warmest_prec_2 = bio18_warmest_prec**2,
+        # bio19_coldest_prec_2 = bio19_coldest_prec**2,
+        # continentality_2 = continentality**2,
+        # growing_deg_days5_2 = growing_deg_days5**2,
+        # chelsa_scd_2 = chelsa_scd**2
+      )
+  } else {
+    dat <- dat |>
+      dplyr::mutate(
+        along_tpi_500_mean_small = along_tpi_500_mean,
+        along_tpi_500_mean_small_2 = along_tpi_500_mean**2,
+        along_tpi_1000_mean_2 = along_tpi_1000_mean**2,
+        along_tpi_250_mean_small = along_tpi_1000_mean,
+        along_tpi_1000_mean_large_2 = along_tpi_5000_mean**2,
+        along_tpi_250_mean_small = along_tpi_250_mean,
+        along_tpi_250_mean_small_2 = along_tpi_250_mean_small**2,
+        along_tpi_2500_mean_large = along_tpi_2500_mean,
+        along_tpi_2500_mean_large_2 = along_tpi_2500_mean_large**2,
+        # onset_spring_2 = onset_spring**2,
+        along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
+        along_slope_mean_2 = along_slope_mean**2,
+        along_slope_max_2 = along_slope_max**2,
+        # solar_radiation_2 = solar_radiation**2,
+        # bio12_annual_prec_2 = bio12_annual_prec**2,
+        # bio18_warmest_prec_2 = bio18_warmest_prec**2,
+        # bio19_coldest_prec_2 = bio19_coldest_prec**2,
+        # continentality_2 = continentality**2,
+        # growing_deg_days5_2 = growing_deg_days5**2,
+        # chelsa_scd_2 = chelsa_scd**2
+      )
+  }
+
 
 
 

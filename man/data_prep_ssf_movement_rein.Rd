@@ -12,6 +12,7 @@ data_prep_ssf_movement_rein(
   land_cover_factor = FALSE,
   land_cover = c("norut_smd", "norut", "smd", "nmd")[1],
   ref_landcover = "heathland",
+  tpi_factor = FALSE,
   include_zoi_nearest = FALSE,
   species = c("wrein", "trein")[1],
   prefix = c("along_", "endpt_", "")[1],
