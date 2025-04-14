@@ -43,7 +43,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     # we need to compute that before hand!!! relative angle
     # dat$rel_angle[is.na(dat$rel_angle)] <-
     dat$step_length <- dat$step_length + 50
-    dat$log_step_length <- log(dat$step_length)
+    dat$log_step_length <- log10(dat$step_length)
 
     cross_vars <- grep("cross", names(dat))
     names(dat)[cross_vars]
@@ -53,7 +53,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
 
   } else {
     dat$step_length <- 100
-    dat$log_step_length <- log(dat$step_length)
+    dat$log_step_length <- log10(dat$step_length)
 
     if(!is.null(formula)) {
       all_vars <- all.vars(f)[-c(1,2)]
@@ -103,7 +103,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
   i <- radii[1]
   for (i in radii){
     cols <- grep(pattern = "bartlett", names(dat)[cols_rmaj_n], value = TRUE) |>
-      grep(pattern = paste0(i, "_"), value = TRUE) |>
+      grep(pattern = paste0("bartlett", i, "_"), fixed = TRUE, value = TRUE) |>
       grep(pattern = "win|sum|cal", invert = TRUE, value = TRUE)
     cc <- cols[1]
     for(cc in cols) {
@@ -111,6 +111,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
       dat <- cbind(dat, tmp)
       names(dat)[ncol(dat)] <- paste0(cc, "_log")
     }
+    # tail(names(dat), 20)
   }
 
   # roads major - cross
@@ -904,9 +905,9 @@ data_prep_ssf_movement_rein <- function(dat, season,
     vars_table <- tibble::tibble(
       name_formula = c("houses", "roads_major", "roads_minor", "railways", "powerlines", "wind_turbines",
                        "cabins_private", "cabins_public_high", "cabins_public_low", "trails_log_pseudotui",
-                       "grazing_animals_2018"),
+                       "grazing_animals_2018", "skitracks_high", "skitracks_low"),
       name_envdata = paste0(name_formula, "_", zoi_shape),
-      suffix = ifelse(grepl("cabins_public", name_formula), "", "_")) |>
+      suffix = ifelse(grepl("cabins_public|skitracks", name_formula), "", "_")) |>
       dplyr::bind_rows(
         tibble::tibble(
           name_formula = c("tpi", "onset", "snow_cover", "slope", "solar_radiation", "lakes", "reservoirs", "lc", "lichen_nina"),
@@ -957,7 +958,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
         # along_tpi_250_mean_small = along_tpi_250_mean,
         along_tpi_250_mean_small_2 = along_tpi_250_mean_small**2,
         # along_tpi_250_mean_small = along_tpi_2500_mean,
-        along_tpi_2500_mean_large_2 = along_tpi_250_mean_small**2,
+        along_tpi_2500_mean_large_2 = along_tpi_2500_mean_large**2,
         # onset_spring_2 = onset_spring**2,
         along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
         # along_slope_mean_2 = along_slope_mean**2,
@@ -974,15 +975,15 @@ data_prep_ssf_movement_rein <- function(dat, season,
     dat <- dat |>
       dplyr::mutate(
         along_tpi_500_mean_small = along_tpi_500_mean,
-        along_tpi_500_mean_small_2 = along_tpi_500_mean**2,
+        along_tpi_500_mean_small_2 = along_tpi_500_mean_small**2,
         along_tpi_1000_mean_2 = along_tpi_1000_mean**2,
-        along_tpi_250_mean_small = along_tpi_1000_mean,
-        along_tpi_1000_mean_large_2 = along_tpi_5000_mean**2,
+        along_tpi_5000_mean_large = along_tpi_5000_mean,
+        along_tpi_5000_mean_large_2 = along_tpi_5000_mean_large**2,
         along_tpi_250_mean_small = along_tpi_250_mean,
         along_tpi_250_mean_small_2 = along_tpi_250_mean_small**2,
         along_tpi_2500_mean_large = along_tpi_2500_mean,
         along_tpi_2500_mean_large_2 = along_tpi_2500_mean_large**2,
-        # onset_spring_2 = onset_spring**2,
+        onset_spring_2 = onset_spring**2,
         along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
         along_slope_mean_2 = along_slope_mean**2,
         along_slope_max_2 = along_slope_max**2,
