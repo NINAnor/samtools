@@ -56,7 +56,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     dat$log_step_length <- log10(dat$step_length)
 
     if(!is.null(formula)) {
-      all_vars <- all.vars(f)[-c(1,2)]
+      all_vars <- all.vars(formula)[-c(1,2)]
     }
   }
 
@@ -101,9 +101,11 @@ data_prep_ssf_movement_rein <- function(dat, season,
   # log road volume in roads major
   radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
   i <- radii[1]
+  sepp <- ifelse(prediction, "$", "_")
+  fixx <- ifelse(prediction, FALSE, TRUE)
   for (i in radii){
     cols <- grep(pattern = "bartlett", names(dat)[cols_rmaj_n], value = TRUE) |>
-      grep(pattern = paste0("bartlett", i, "_"), fixed = TRUE, value = TRUE) |>
+      grep(pattern = paste0("bartlett", i, sepp), fixed = fixx, value = TRUE) |>
       grep(pattern = "win|sum|cal", invert = TRUE, value = TRUE)
     cc <- cols[1]
     for(cc in cols) {
@@ -293,7 +295,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     # cumulative
     if(prediction) {
 
-      var_cab_low <- grep("cabins_public_low_bartlett", all.vars(f), value = T)
+      var_cab_low <- grep("cabins_public_low_bartlett", all_vars, value = T)
       summ <- strsplit(var_cab_low[1], split = "_")[[1]] |> dplyr::last()
 
       grep("cabins_public_medium_bartlett", names(dat), value = T)
@@ -390,11 +392,12 @@ data_prep_ssf_movement_rein <- function(dat, season,
   # cabins low cumulative = sum cabins large and hotels norway
   # cabins low nearest = minimum cabins large and hotels in norway
   radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+  i <- radii[1]
   for (i in radii){
 
     if(prediction) {
 
-      var_cab_low <- grep("cabins_public_high_bartlett", all.vars(f), value = T)
+      var_cab_low <- grep("cabins_public_high_bartlett", all_vars, value = T)
       summ <- strsplit(var_cab_low[1], split = "_")[[1]] |> dplyr::last()
       # if cumulative
       if(grepl("bartlett", var_cab_low[1])) {
@@ -808,7 +811,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
   # climate phenology
 
   # onset of spring
-  names(dat)[grep(paste0(prefix, "sprAverageAllYrs"), names(dat))] <- paste0(prefix, "onset_spring")
+  names(dat)[grep(paste0(prefix, "sprAverageAllYrs"), names(dat))] <- sub("sprAverageAllYrs", "onset_spring", names(dat)[grep(paste0("sprAverageAllYrs"), names(dat))])
   # bio12 annual prec
   names(dat)[grep(paste0(prefix, "BIOCLIM_bio12_historic"), names(dat))] <- paste0(prefix, "bio12_annual_prec")
   # bio18 warmest prec
@@ -916,7 +919,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
         )
       )
 
-    ii = 1
+    ii = 2
     for(ii in seq_len(nrow(vars_table))) {
 
       string <- vars_table$name_formula[ii]
@@ -925,12 +928,17 @@ data_prep_ssf_movement_rein <- function(dat, season,
       string_env <- vars_table$name_envdata[ii]
       (rmin_vars_envdat <- grep(string_env, names(dat), value = TRUE))
 
-      i <- rmin_vars_envdat[2]
+      i <- rmin_vars_envdat[1]
       for(i in rmin_vars_envdat) {
         if(length(nn <- grep(paste0(i, vars_table$suffix[ii]), rmin_vars)) > 0 & i != "lc_lichen") {
+          # if(string == "roads_major" & !grepl("log", i)) next
           # print(i)
           if(length(nn) > 1) nn <- nn[1]
-          dat[[rmin_vars[nn]]] <- dat[[i]]
+          if(string == "roads_major") {
+            dat[[rmin_vars[nn]]] <- log10(dat[[i]]+1)
+          } else {
+            dat[[rmin_vars[nn]]] <- dat[[i]]
+          }
         }
       }
 
@@ -960,7 +968,6 @@ data_prep_ssf_movement_rein <- function(dat, season,
         # along_tpi_250_mean_small = along_tpi_2500_mean,
         along_tpi_2500_mean_large_2 = along_tpi_2500_mean_large**2,
         # onset_spring_2 = onset_spring**2,
-        along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
         # along_slope_mean_2 = along_slope_mean**2,
         along_slope_max_2 = along_slope_max**2,
         # solar_radiation_2 = solar_radiation**2,
@@ -971,6 +978,10 @@ data_prep_ssf_movement_rein <- function(dat, season,
         # growing_deg_days5_2 = growing_deg_days5**2,
         # chelsa_scd_2 = chelsa_scd**2
       )
+    if(season != "sum") {
+      dat <- dat |>
+        dplyr::mutate(along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2)
+    }
   } else {
     dat <- dat |>
       dplyr::mutate(
@@ -983,7 +994,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
         along_tpi_250_mean_small_2 = along_tpi_250_mean_small**2,
         along_tpi_2500_mean_large = along_tpi_2500_mean,
         along_tpi_2500_mean_large_2 = along_tpi_2500_mean_large**2,
-        onset_spring_2 = onset_spring**2,
+        along_onset_spring_mean_2 = along_onset_spring_mean**2,
         along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2,
         along_slope_mean_2 = along_slope_mean**2,
         along_slope_max_2 = along_slope_max**2,
