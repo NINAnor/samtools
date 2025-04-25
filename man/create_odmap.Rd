@@ -21,6 +21,13 @@ be used for habitat, movement, and connectivity modeling and suggested to
 be used by species (i.e. one folder per species), but this can be used
 in other ways depending of the user preferences.
 }
+\details{
+The function will probably throw some warnings because R project files are
+created in nested folders where a R proj file is already existing. The user
+needs to mannually accept that to allow the creation of these files, which
+makes it easier for one to set relative paths for each of the modeling
+steps.
+}
 \examples{
 create_odmap(path = "./test")
 
