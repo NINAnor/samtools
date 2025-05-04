@@ -241,6 +241,26 @@ data_prep_rsf_habitat_rein <- function(dat, season,
     dat <- cbind(dat, tmp)
     names(dat)[ncol(dat)] <- paste0("cabins_public_high_nearest", i)
   }
+
+  # putting together all cabins - for tamrein
+  if(species == "trein") {
+    radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+    for (i in radii){
+      # cumulative
+      tmp <- dat[,paste0("cabins_public_high_bartlett", i)] +
+        dat[,paste0("cabins_public_low_bartlett", i)]
+      dat <- cbind(dat, tmp)
+      names(dat)[ncol(dat)] <- paste0("cabins_public_all_bartlett", i)
+      # nearest
+      if(!prediction | (prediction & include_zoi_nearest)) {
+        tmp <- min(dat[,paste0("cabins_public_high_nearest", i)],
+                   dat[,paste0("cabins_public_low_nearest", i)], na.rm = TRUE)
+        dat <- cbind(dat, tmp)
+        names(dat)[ncol(dat)] <- paste0("cabins_public_all_nearest", i)
+      }
+    }
+  }
+
   # summer trails
   string <- "trails"
   cols_tr_n <- grep(string, names(dat))
@@ -264,6 +284,22 @@ data_prep_rsf_habitat_rein <- function(dat, season,
   names(dat)[cols_skil_n]
   ski_seas <- ifelse(season == "win", "win", "cal")
   names(dat)[cols_skil_n] <- sub(paste0(string, "_", ski_seas), string, names(dat)[cols_skil_n])
+
+  radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+  for (i in radii){
+    # cumulative
+    tmp <- dat[,paste0("skitracks_high_bartlett", i)] +
+      dat[,paste0("skitracks_low_bartlett", i)]
+    dat <- cbind(dat, tmp)
+    names(dat)[ncol(dat)] <- paste0("skitracks_all_bartlett", i)
+    # nearest
+    if(!prediction | (prediction & include_zoi_nearest)) {
+      tmp <- min(dat[,paste0("skitracks_high_nearest", i)],
+                 dat[,paste0("skitracks_low_nearest", i)], na.rm = TRUE)
+      dat <- cbind(dat, tmp)
+      names(dat)[ncol(dat)] <- paste0("skitracks_all_nearest", i)
+    }
+  }
 
   ## merge skitracks_win_      high-low - very few of each
   # dat$ski_win_100 <- (dat$skitracks_win_high_100 + dat$skitracks_win_low_100)
