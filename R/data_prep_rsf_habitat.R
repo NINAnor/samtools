@@ -371,7 +371,7 @@ data_prep_rsf_habitat_rein <- function(dat, season,
     #-- NORUT
     # replace by names, as a factor
     dat$landcover_NORUT_2009 <- ifelse(dat$landcover_NORUT_2009 == 0, NA, dat$landcover_NORUT_2009)
-    dat$landcover_NORUT_2009 <- classes_norut$V3[factor(dat$landcover_NORUT_2009)] |>
+    dat$landcover_NORUT_2009 <- classes_norut$V3[factor(dat$landcover_NORUT_2009, levels = classes_norut$V1)] |>
       factor(levels = unique(classes_norut$V3))
 
     dat <- dat |>
@@ -381,7 +381,7 @@ data_prep_rsf_habitat_rein <- function(dat, season,
     #-- NORUT-SMD
     # replace by names, as a factor
     dat$landcover_norut_smd <- ifelse(dat$landcover_norut_smd == 0, NA, dat$landcover_norut_smd)
-    dat$landcover_norut_smd <- classes_norut_smd$V3[factor(dat$landcover_norut_smd)] |>
+    dat$landcover_norut_smd <- classes_norut_smd$V3[factor(dat$landcover_norut_smd, levels = classes_norut_smd$V1)] |>
       factor(levels = unique(classes_norut_smd$V3))
 
     dat <- dat |>
@@ -409,11 +409,26 @@ data_prep_rsf_habitat_rein <- function(dat, season,
       names(dat)[cols_lc_n]
       names(dat)[cols_lc_n] <- sub(string, "lc", names(dat)[cols_lc_n])
 
-      dat$landcover_norut_smd <- relevel(dat$landcover_norut_smd, ref = ref_landcover)
+      dat$landcover_norut_smd <- relevel(dat$landcover_norut_smd, ref = ref_landcover[1])
       # remove lichen to the reference category
       # another possibility would be to move it to "other"
       #------- NEED TO BE CHANGED in case the ref category is not heathland
-      dat$landcover_norut_smd <- forcats::fct_collapse(dat$landcover_norut_smd, heathland = c("heathland", "lichen"))
+      # dat$landcover_norut_smd <- forcats::fct_collapse(dat$landcover_norut_smd, mires = ref_landcover)
+
+      # Unique categories
+      unique_vals <- levels(dat$landcover_norut_smd)
+      # Define the values to group into the ref category
+      to_group <- ref_landcover
+      # Create a named vector: names = original values, values = new levels
+      # Default: keep the name as the value
+      group_map <- setNames(unique_vals, unique_vals)
+      # Overwrite the group labels for values in 'to_group'
+      group_map[to_group] <- ref_landcover[1]
+      classes_new <- unique(group_map)
+
+      # Apply mapping and convert to factor
+      dat$landcover_norut_smd <- factor(group_map[dat$landcover_norut_smd], levels = classes_new)
+
     } else {
 
       if(land_cover == "norut") {
@@ -422,11 +437,24 @@ data_prep_rsf_habitat_rein <- function(dat, season,
         names(dat)[cols_lc_n]
         names(dat)[cols_lc_n] <- sub(string, "lc", names(dat)[cols_lc_n])
 
-        dat$landcover_NORUT_2009 <- relevel(dat$landcover_NORUT_2009, ref = ref_landcover)
+        dat$landcover_NORUT_2009 <- relevel(dat$landcover_NORUT_2009, ref = ref_landcover[1])
         # remove lichen to the reference category
         # another possibility would be to move it to "other"
         #------- NEED TO BE CHANGED in case the ref category is not heathland
-        dat$landcover_NORUT_2009 <- forcats::fct_collapse(dat$landcover_NORUT_2009, heathland = c("heathland", "lichen"))
+        # dat$landcover_NORUT_2009 <- forcats::fct_collapse(dat$landcover_NORUT_2009, heathland = c("heathland", "lichen"))
+        # Unique categories
+        unique_vals <- levels(dat$landcover_NORUT_2009)
+        # Define the values to group into the ref category
+        to_group <- ref_landcover
+        # Create a named vector: names = original values, values = new levels
+        # Default: keep the name as the value
+        group_map <- setNames(unique_vals, unique_vals)
+        # Overwrite the group labels for values in 'to_group'
+        group_map[to_group] <- ref_landcover[1]
+        classes_new <- unique(group_map)
+
+        # Apply mapping and convert to factor
+        dat$landcover_NORUT_2009 <- factor(group_map[dat$landcover_NORUT_2009], levels = classes_new)
       }
 
       #--- add options for SMD and NMD later for Sweden
