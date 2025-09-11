@@ -919,7 +919,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
         )
       )
 
-    ii = 2
+    ii = 16
     for(ii in seq_len(nrow(vars_table))) {
 
       string <- vars_table$name_formula[ii]
@@ -979,8 +979,9 @@ data_prep_ssf_movement_rein <- function(dat, season,
         # chelsa_scd_2 = chelsa_scd**2
       )
     if(season != "sum") {
-      dat <- dat |>
-        dplyr::mutate(along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2)
+      if(length(dat[["along_snow_cover_days_mean"]]) > 0) dat[["along_snow_cover_days_mean_2"]] <- dat[["along_snow_cover_days_mean"]]**2
+      # dat <- dat |>
+      #   dplyr::mutate(along_snow_cover_days_mean_2 = along_snow_cover_days_mean**2)
     }
   } else {
     dat <- dat |>
