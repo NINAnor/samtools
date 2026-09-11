@@ -19,7 +19,7 @@ of rows, cols, and cells, and the type of data (e.g. CELL, FCELL).
 }
 \description{
 This function gets information from a raster layer in GRASS GIS and returns
-it as a list. It is a wrapper for \code{\link[rgrass:r.info]{rgrass::r.info()}}.
+it as a list. It is a wrapper for module \code{\link[=r.info]{r.info()}} in GRASS GIS.
 }
 \examples{
 if(FALSE) {

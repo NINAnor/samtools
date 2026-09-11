@@ -1,7 +1,7 @@
 #' Get information from a raster
 #'
 #' This function gets information from a raster layer in GRASS GIS and returns
-#' it as a list. It is a wrapper for [rgrass::r.info()].
+#' it as a list. It is a wrapper for module [r.info()] in GRASS GIS.
 #'
 #' @param map `[character]` \cr Name of the raster layer, possibly including the
 #' mapset in the format `"map_name@mapset_name"` if in a mapset different from the

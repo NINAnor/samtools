@@ -36,6 +36,18 @@ data_prep_ssf_movement_rein <- function(dat, season,
                                         formula = NULL){
 
   #---
+  # function to fill NAs
+  fill_na_mean <- function(x) {
+    x[is.na(x)] <- mean(x, na.rm = TRUE)
+    x
+  }
+
+  fill_na_zero <- function(x) {
+    x[is.na(x)] <- 0
+    x
+  }
+
+  #---
   # rename variables and compute new, derived variables
 
   # movement variables
@@ -45,7 +57,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     dat$step_length <- dat$step_length + 50
     dat$log_step_length <- log10(dat$step_length)
 
-    cross_vars <- grep("cross", names(dat))
+    cross_vars <- grep(prefix_cross, names(dat))
     names(dat)[cross_vars]
     for(i in cross_vars) {
       dat[[i]][dat[[i]] < 0] <- 0
@@ -115,6 +127,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     }
     # tail(names(dat), 20)
   }
+  #### NEED TO ADD LOG HERE IF WE INCLUDE NEAREST
 
   # roads major - cross
   string <- "cross_roads_major"
@@ -195,6 +208,9 @@ data_prep_ssf_movement_rein <- function(dat, season,
   }
 
   # fences cross
+  string <- "cross_fences"
+  cols_rmin_n <- grep(string, names(dat))
+  names(dat)[cols_rmin_n]
   if(prediction & species == "trein") {
     string <- "cross_fences"
     v_cross_roads <- grep(string, all_vars, value = TRUE)
@@ -291,6 +307,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
   # cabins low cumulative = sum cabins small and medium
   # cabins low nearest = minimum cabins small and medium
   radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+  i <- radii[1]
   for (i in radii){
     # cumulative
     if(prediction) {
@@ -308,7 +325,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
           names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_bartlett", i, "_", summ)
         } else {
           if(summ == "max") {
-            tmp <- max(dat[,paste0("cabins_public_medium_bartlett", i)],
+            tmp <- pmax(dat[,paste0("cabins_public_medium_bartlett", i)],
                        dat[,paste0("cabins_public_small_bartlett", i)], na.rm = TRUE)
             dat <- cbind(dat, tmp)
             names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_bartlett", i, "_", summ)
@@ -326,7 +343,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
             names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_nearest", i, "_", summ)
           } else {
             if(summ == "max") {
-              tmp <- min(dat[,paste0("cabins_public_medium_nearest", i)],
+              tmp <- pmin(dat[,paste0("cabins_public_medium_nearest", i)],
                          dat[,paste0("cabins_public_small_nearest", i)], na.rm = TRUE)
               dat <- cbind(dat, tmp)
               names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_nearest", i, "_", summ)
@@ -339,18 +356,21 @@ data_prep_ssf_movement_rein <- function(dat, season,
 
     } else {
 
+      summ <- "_mean"
       for(summ in c("_max", "_mean")) {
-        if(summ == "_mean") {
-          tmp <- dat[,paste0(prefix, "cabins_public_medium_bartlett", i, summ)] +
-            dat[,paste0(prefix, "cabins_public_small_bartlett", i, summ)]
-          dat <- cbind(dat, tmp)
-          names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_bartlett", i, summ)
-        } else {
-          if(summ == "_max") {
-            tmp <- max(dat[,paste0(prefix, "cabins_public_medium_bartlett", i, summ)],
-                       dat[,paste0(prefix, "cabins_public_small_bartlett", i, summ)], na.rm = TRUE)
-            dat <- cbind(dat, tmp)
-            names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_bartlett", i, summ)
+        if(any(grepl(paste0(prefix, "cabins_public_medium_bartlett", i, summ), names(dat)))) {
+          if(summ == "_mean") {
+              tmp <- dat[,paste0(prefix, "cabins_public_medium_bartlett", i, summ)] +
+                dat[,paste0(prefix, "cabins_public_small_bartlett", i, summ)]
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_bartlett", i, summ)
+          } else {
+            if(summ == "_max") {
+              tmp <- pmax(dat[,paste0(prefix, "cabins_public_medium_bartlett", i, summ)],
+                          dat[,paste0(prefix, "cabins_public_small_bartlett", i, summ)], na.rm = TRUE)
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_bartlett", i, summ)
+            }
           }
         }
       }
@@ -358,17 +378,19 @@ data_prep_ssf_movement_rein <- function(dat, season,
       # nearest
       if(!prediction) {
         for(summ in c("_max", "_mean")) {
-          if(summ == "_mean") {
-            tmp <- dat[,paste0(prefix, "cabins_public_medium_nearest", i, summ)] +
-              dat[,paste0(prefix, "cabins_public_small_nearest", i, summ)]
-            dat <- cbind(dat, tmp)
-            names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_nearest", i, summ)
-          } else {
-            if(summ == "_max") {
-              tmp <- min(dat[,paste0(prefix, "cabins_public_medium_nearest", i, summ)],
-                         dat[,paste0(prefix, "cabins_public_small_nearest", i, summ)], na.rm = TRUE)
+          if(any(grepl(paste0(prefix, "cabins_public_medium_nearest", i, summ), names(dat)))) {
+            if(summ == "_mean") {
+              tmp <- dat[,paste0(prefix, "cabins_public_medium_nearest", i, summ)] +
+                dat[,paste0(prefix, "cabins_public_small_nearest", i, summ)]
               dat <- cbind(dat, tmp)
               names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_nearest", i, summ)
+            } else {
+              if(summ == "_max") {
+                tmp <- pmin(dat[,paste0(prefix, "cabins_public_medium_nearest", i, summ)],
+                            dat[,paste0(prefix, "cabins_public_small_nearest", i, summ)], na.rm = TRUE)
+                dat <- cbind(dat, tmp)
+                names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_low_nearest", i, summ)
+              }
             }
           }
         }
@@ -408,7 +430,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
           names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_bartlett", i, "_", summ)
         } else {
           if(summ == "max") {
-            tmp <- max(dat[,paste0("cabins_public_large_bartlett", i)],
+            tmp <- pmax(dat[,paste0("cabins_public_large_bartlett", i)],
                        dat[,paste0("hotels_bartlett", i)], na.rm = TRUE)
             dat <- cbind(dat, tmp)
             names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_bartlett", i, "_", summ)
@@ -426,7 +448,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
             names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_nearest", i, "_", summ)
           } else {
             if(summ == "max") {
-              tmp <- min(dat[,paste0("cabins_public_large_nearest", i)],
+              tmp <- pmin(dat[,paste0("cabins_public_large_nearest", i)],
                          dat[,paste0("hotels_nearest", i)], na.rm = TRUE)
               dat <- cbind(dat, tmp)
               names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_nearest", i, "_", summ)
@@ -441,42 +463,150 @@ data_prep_ssf_movement_rein <- function(dat, season,
 
       # cumulative
       for(summ in c("_max", "_mean")) {
-        if(summ == "_mean") {
-          tmp <- dat[,paste0(prefix, "cabins_public_large_bartlett", i, summ)] +
-            dat[,paste0(prefix, "hotels_bartlett", i, summ)]
-          dat <- cbind(dat, tmp)
-          names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_bartlett", i, summ)
-        } else {
-          if(summ == "_max") {
-            tmp <- max(dat[,paste0(prefix, "cabins_public_large_bartlett", i, summ)],
-                       dat[,paste0(prefix, "hotels_bartlett", i, summ)], na.rm = TRUE)
+        if(any(grepl(paste0(prefix, "cabins_public_large_bartlett", i, summ), names(dat)))) {
+          if(summ == "_mean") {
+            tmp <- dat[,paste0(prefix, "cabins_public_large_bartlett", i, summ)] +
+              dat[,paste0(prefix, "hotels_bartlett", i, summ)]
             dat <- cbind(dat, tmp)
             names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_bartlett", i, summ)
-          }
-        }
-      }
-
-      # nearest
-      if(!prediction & include_zoi_nearest) {
-        for(summ in c("_max", "_mean")) {
-          if(summ == "_mean") {
-            tmp <- dat[,paste0(prefix, "cabins_public_large_nearest", i, summ)] +
-              dat[,paste0(prefix, "hotels_nearest", i, summ)]
-            dat <- cbind(dat, tmp)
-            names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_nearest", i, summ)
           } else {
             if(summ == "_max") {
-              tmp <- min(dat[,paste0(prefix, "cabins_public_large_nearest", i, summ)],
-                         dat[,paste0(prefix, "hotels_nearest", i, summ)], na.rm = TRUE)
+              tmp <- max(dat[,paste0(prefix, "cabins_public_large_bartlett", i, summ)],
+                         dat[,paste0(prefix, "hotels_bartlett", i, summ)], na.rm = TRUE)
               dat <- cbind(dat, tmp)
-              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_nearest", i, summ)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_bartlett", i, summ)
             }
           }
         }
       }
 
+      # nearest
+      if(!prediction) {
+        for(summ in c("_max", "_mean")) {
+          if(any(grepl(paste0(prefix, "cabins_public_large_nearest", i, summ), names(dat)))) {
+            if(summ == "_mean") {
+              tmp <- dat[,paste0(prefix, "cabins_public_large_nearest", i, summ)] +
+                dat[,paste0(prefix, "hotels_nearest", i, summ)]
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_nearest", i, summ)
+            } else {
+              if(summ == "_max") {
+                tmp <- min(dat[,paste0(prefix, "cabins_public_large_nearest", i, summ)],
+                           dat[,paste0(prefix, "hotels_nearest", i, summ)], na.rm = TRUE)
+                dat <- cbind(dat, tmp)
+                names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_high_nearest", i, summ)
+              }
+            }
+          }
+        }
+      }
     }
 
+  }
+
+  # putting together all cabins - for tamrein
+  # all public cabins for tamrein: low + high
+  if (species == "trein") {
+    radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+
+    for (i in radii) {
+
+      if (prediction) {
+
+        var_cab_all <- grep("cabins_public_all", all_vars, value = TRUE)
+
+        if (length(var_cab_all) > 0) {
+          summ <- strsplit(var_cab_all[1], split = "_")[[1]] |>
+            dplyr::last()
+
+          # cumulative / density
+          if (any(grepl("bartlett", var_cab_all))) {
+            if (summ == "mean") {
+              tmp <- dat[, paste0(prefix, "cabins_public_high_bartlett", i, "_", summ)] +
+                dat[, paste0(prefix, "cabins_public_low_bartlett", i, "_", summ)]
+
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_all_bartlett", i, "_", summ)
+            }
+
+            if (summ == "max") {
+              tmp <- pmax(
+                dat[, paste0(prefix, "cabins_public_high_bartlett", i, "_", summ)],
+                dat[, paste0(prefix, "cabins_public_low_bartlett", i, "_", summ)],
+                na.rm = TRUE
+              )
+
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_all_bartlett", i, "_", summ)
+            }
+          }
+
+          # nearest
+          if (any(grepl("nearest", var_cab_all))) {
+            if (summ == "mean") {
+              tmp <- dat[, paste0(prefix, "cabins_public_high_nearest", i, "_", summ)] +
+                dat[, paste0(prefix, "cabins_public_low_nearest", i, "_", summ)]
+
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_all_nearest", i, "_", summ)
+            }
+
+            if (summ == "max") {
+              tmp <- pmin(
+                dat[, paste0(prefix, "cabins_public_high_nearest", i, "_", summ)],
+                dat[, paste0(prefix, "cabins_public_low_nearest", i, "_", summ)],
+                na.rm = TRUE
+              )
+
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_all_nearest", i, "_", summ)
+            }
+          }
+        }
+
+      } else {
+
+        # cumulative / density
+        for (summ in c("_max", "_mean")) {
+          high_var <- paste0(prefix, "cabins_public_high_bartlett", i, summ)
+          low_var <- paste0(prefix, "cabins_public_low_bartlett", i, summ)
+
+          if (all(c(high_var, low_var) %in% names(dat))) {
+            if (summ == "_mean") {
+              tmp <- dat[, high_var] + dat[, low_var]
+            }
+
+            if (summ == "_max") {
+              tmp <- pmax(dat[, high_var], dat[, low_var], na.rm = TRUE)
+            }
+
+            dat <- cbind(dat, tmp)
+            names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_all_bartlett", i, summ)
+          }
+        }
+
+        # nearest
+        if (include_zoi_nearest) {
+          for (summ in c("_max", "_mean")) {
+            high_var <- paste0(prefix, "cabins_public_high_nearest", i, summ)
+            low_var <- paste0(prefix, "cabins_public_low_nearest", i, summ)
+
+            if (all(c(high_var, low_var) %in% names(dat))) {
+              if (summ == "_mean") {
+                tmp <- dat[, high_var] + dat[, low_var]
+              }
+
+              if (summ == "_max") {
+                tmp <- pmin(dat[, high_var], dat[, low_var], na.rm = TRUE)
+              }
+
+              dat <- cbind(dat, tmp)
+              names(dat)[ncol(dat)] <- paste0(prefix, "cabins_public_all_nearest", i, summ)
+            }
+          }
+        }
+      }
+    }
   }
 
   # summer trails
@@ -600,7 +730,6 @@ data_prep_ssf_movement_rein <- function(dat, season,
     }
     dat$log_along_dem_cum_diff <- log10(dat$along_dem_cum_diff + 1)
   }
-
 
   names(dat)[grep("dem_slope", names(dat))] <- sub("dem_slope", "slope", names(dat)[grep("dem_slope", names(dat))])
   names(dat)[grep("dem_aspect", names(dat))] <- sub("dem_aspect", "aspect", names(dat)[grep("dem_aspect", names(dat))])
@@ -876,13 +1005,25 @@ data_prep_ssf_movement_rein <- function(dat, season,
     dat[[reserv_var_formula]] <- dat[["reservoirs_hydro"]]
 
     # fill NAs
-    dat[[paste0(prefix, "onset_spring")]][is.na(dat[[paste0(prefix, "onset_spring")]])] <- max(dat[[paste0(prefix, "onset_spring")]], na.rm = TRUE)
+    dat[[paste0(prefix, "onset_spring")]][is.na(dat[[paste0(prefix, "onset_spring")]])] <- mean(dat[[paste0(prefix, "onset_spring")]], na.rm = TRUE)
 
-    if(sum(grepl(paste0(prefix, "lichen_nina"), names(dat))) > 0)
-      dat[[paste0(prefix, "lichen_nina")]][is.na(dat[[paste0(prefix, "lichen_nina")]])] <- 0#mean(dat[[paste0(prefix, "lichen_nina")]], na.rm = TRUE)
-    if(sum(grepl(paste0(prefix, "lichen_slu"), names(dat))) > 0)
-      dat[[paste0(prefix, "lichen_slu")]][is.na(dat[[paste0(prefix, "lichen_slu")]])] <- 0#mean(dat[[paste0(prefix, "lichen_slu")]], na.rm = TRUE)
-    # dat[[paste0(prefix, "lichen_nose")]][is.na(dat[[paste0(prefix, "lichen_nose")]])] <- mean(dat[[paste0(prefix, "lichen_nose")]], na.rm = TRUE)
+    if(species == "trein") {
+      if(sum(grepl(paste0(prefix, "lichen_nina"), names(dat))) > 0)
+        dat[[paste0(prefix, "lichen_nina")]][is.na(dat[[paste0(prefix, "lichen_nina")]])] <- mean(dat[[paste0(prefix, "lichen_nina")]], na.rm = TRUE)
+      if(sum(grepl(paste0(prefix, "lichen_slu"), names(dat))) > 0)
+        dat[[paste0(prefix, "lichen_slu")]][is.na(dat[[paste0(prefix, "lichen_slu")]])] <- mean(dat[[paste0(prefix, "lichen_slu")]], na.rm = TRUE)
+      if(sum(grepl(paste0(prefix, "lichen_nose"), names(dat))) > 0)
+        dat[[paste0(prefix, "lichen_nose")]][is.na(dat[[paste0(prefix, "lichen_nose")]])] <- mean(dat[[paste0(prefix, "lichen_nose")]], na.rm = TRUE)
+      # dat[[paste0(prefix, "lichen_nose")]][is.na(dat[[paste0(prefix, "lichen_nose")]])] <- mean(dat[[paste0(prefix, "lichen_nose")]], na.rm = TRUE)
+
+    } else {
+      if(sum(grepl(paste0(prefix, "lichen_nina"), names(dat))) > 0)
+        dat[[paste0(prefix, "lichen_nina")]][is.na(dat[[paste0(prefix, "lichen_nina")]])] <- 0#mean(dat[[paste0(prefix, "lichen_nina")]], na.rm = TRUE)
+      if(sum(grepl(paste0(prefix, "lichen_slu"), names(dat))) > 0)
+        dat[[paste0(prefix, "lichen_slu")]][is.na(dat[[paste0(prefix, "lichen_slu")]])] <- 0#mean(dat[[paste0(prefix, "lichen_slu")]], na.rm = TRUE)
+      # dat[[paste0(prefix, "lichen_nose")]][is.na(dat[[paste0(prefix, "lichen_nose")]])] <- mean(dat[[paste0(prefix, "lichen_nose")]], na.rm = TRUE)
+
+    }
 
     # compute length of crossing all water
     dat[["cross_water_length"]] <- as.numeric(dat[[river_var_formula]]) + as.numeric(dat[[lakes_var_formula]]) + as.numeric(dat[[reserv_var_formula]])
@@ -978,6 +1119,8 @@ data_prep_ssf_movement_rein <- function(dat, season,
         # growing_deg_days5_2 = growing_deg_days5**2,
         # chelsa_scd_2 = chelsa_scd**2
       )
+    dat <- dat |>
+      dplyr::filter(along_slope_max != -Inf & along_slope_max != Inf)
     if(season != "sum") {
       if(length(dat[["along_snow_cover_days_mean"]]) > 0) dat[["along_snow_cover_days_mean_2"]] <- dat[["along_snow_cover_days_mean"]]**2
       # dat <- dat |>
@@ -1007,6 +1150,8 @@ data_prep_ssf_movement_rein <- function(dat, season,
         # growing_deg_days5_2 = growing_deg_days5**2,
         # chelsa_scd_2 = chelsa_scd**2
       )
+    dat <- dat |>
+      dplyr::filter(along_slope_max != -Inf & along_slope_max != Inf)
   }
 
 
