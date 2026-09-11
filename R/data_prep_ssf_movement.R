@@ -235,6 +235,19 @@ data_prep_ssf_movement_rein <- function(dat, season,
   cols_min_n <- grep(string, names(dat))
   names(dat)[cols_min_n]
 
+  # if(prediction) {
+  #   radii <- c(100, 250, 500, 1000, 2500, 5000, 10000)
+  #
+  #   for (i in radii) {
+  #     source <- paste0("mining_bartlett", i)
+  #     target <- paste0(prefix, "mining_bartlett", i, "_mean")
+  #
+  #     if (target %in% all_vars && source %in% names(dat)) {
+  #       dat[[target]] <- dat[[source]]
+  #     }
+  #   }
+  # }
+
   # power lines
   string <- "power_lines"
   cols_rpl_n <- grep(string, names(dat))
@@ -312,7 +325,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
     # cumulative
     if(prediction) {
 
-      var_cab_low <- grep("cabins_public_low_bartlett", all_vars, value = T)
+      var_cab_low <- grep("cabins_public_low_bartlett|cabins_public_all_bartlett", all_vars, value = T)
       summ <- strsplit(var_cab_low[1], split = "_")[[1]] |> dplyr::last()
 
       grep("cabins_public_medium_bartlett", names(dat), value = T)
@@ -419,7 +432,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
 
     if(prediction) {
 
-      var_cab_low <- grep("cabins_public_high_bartlett", all_vars, value = T)
+      var_cab_low <- grep("cabins_public_high_bartlett|cabins_public_all_bartlett", all_vars, value = T)
       summ <- strsplit(var_cab_low[1], split = "_")[[1]] |> dplyr::last()
       # if cumulative
       if(grepl("bartlett", var_cab_low[1])) {
@@ -848,7 +861,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
           clear_cuts_lines <- which(!is.na(dat[[paste0(prefix, "clear_cuts_se")]]))
           dat[[paste0(prefix, "landcover_norut_smd")]] <- as.character(dat[[paste0(prefix, "landcover_norut_smd")]])
           dat[[paste0(prefix, "landcover_norut_smd")]][clear_cuts_lines] <-
-            ifelse(dat[["year"]][clear_cuts_lines] > dat[[paste0(prefix, "clear_cuts_se")]][clear_cuts_lines],
+            ifelse(reference_year > dat[[paste0(prefix, "clear_cuts_se")]][clear_cuts_lines],
                    "clear_cut", dat[[paste0(prefix, "landcover_norut_smd")]][clear_cuts_lines])
           dat[[paste0(prefix, "landcover_norut_smd")]] <- factor(dat[[paste0(prefix, "landcover_norut_smd")]],
                                                                  levels = levels_norut_smd)
@@ -1047,8 +1060,8 @@ data_prep_ssf_movement_rein <- function(dat, season,
     # )
 
     vars_table <- tibble::tibble(
-      name_formula = c("houses", "roads_major", "roads_minor", "railways", "powerlines", "wind_turbines",
-                       "cabins_private", "cabins_public_high", "cabins_public_low", "trails_log_pseudotui",
+      name_formula = c("houses", "roads_major", "roads_minor", "railways", "mining", "powerlines", "wind_turbines",
+                       "cabins_private", "cabins_public_high", "cabins_public_low", "cabins_public_all", "trails_log_pseudotui",
                        "grazing_animals_2018", "skitracks_high", "skitracks_low"),
       name_envdata = paste0(name_formula, "_", zoi_shape),
       suffix = ifelse(grepl("cabins_public|skitracks", name_formula), "", "_")) |>
@@ -1060,7 +1073,7 @@ data_prep_ssf_movement_rein <- function(dat, season,
         )
       )
 
-    ii = 16
+    ii = 23
     for(ii in seq_len(nrow(vars_table))) {
 
       string <- vars_table$name_formula[ii]
@@ -1071,16 +1084,30 @@ data_prep_ssf_movement_rein <- function(dat, season,
 
       i <- rmin_vars_envdat[1]
       for(i in rmin_vars_envdat) {
-        if(length(nn <- grep(paste0(i, vars_table$suffix[ii]), rmin_vars)) > 0 & i != "lc_lichen") {
-          # if(string == "roads_major" & !grepl("log", i)) next
-          # print(i)
-          if(length(nn) > 1) nn <- nn[1]
-          if(string == "roads_major") {
-            dat[[rmin_vars[nn]]] <- log10(dat[[i]]+1)
-          } else {
-            dat[[rmin_vars[nn]]] <- dat[[i]]
+        if(species == "wrein") {
+          if(length(nn <- grep(paste0(i, vars_table$suffix[ii]), rmin_vars)) > 0 & i != "lc_lichen") {
+            # if(string == "roads_major" & !grepl("log", i)) next
+            # print(i)
+            if(length(nn) > 1) nn <- nn[1]
+            if(string == "roads_major") {
+              dat[[rmin_vars[nn]]] <- log10(dat[[i]]+1)
+            } else {
+              dat[[rmin_vars[nn]]] <- dat[[i]]
+            }
+          }
+        } else {
+          if(length(nn <- grep(paste0(i, vars_table$suffix[ii]), rmin_vars)) > 0) {
+            # if(string == "roads_major" & !grepl("log", i)) next
+            # print(i)
+            if(length(nn) > 1) nn <- nn[1]
+            if(string == "roads_major") {
+              dat[[rmin_vars[nn]]] <- log10(dat[[i]]+1)
+            } else {
+              dat[[rmin_vars[nn]]] <- dat[[i]]
+            }
           }
         }
+
       }
 
     }
