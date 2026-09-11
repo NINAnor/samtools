@@ -1,7 +1,8 @@
 # Get information from a raster
 
 This function gets information from a raster layer in GRASS GIS and
-returns it as a list. It is a wrapper for `rgrass::r.info()`.
+returns it as a list. It is a wrapper for module `r.info()` in GRASS
+GIS.
 
 ## Usage
 

@@ -14,14 +14,14 @@
 
 ## Citation
 
-Niebuhr B, van Moorter B (2025). *samtools: Tools for handling data and
+Niebuhr B, van Moorter B (2026). *samtools: Tools for handling data and
 databases for spatial and connectivity modeling.*. R package version
 0.0.0.9000, <https://ninanor.github.io/samtools/>.
 
     @Manual{,
       title = {samtools: Tools for handling data and databases for spatial and connectivity modeling.},
       author = {Bernardo Niebuhr and Bram {van Moorter}},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.0.0.9000},
       url = {https://ninanor.github.io/samtools/},
     }
